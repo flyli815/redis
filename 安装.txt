@@ -39,6 +39,7 @@ redis> set foo bar
 OK
 redis> get foo
 "bar"
+redis> ping
+PONG
 
-
-上面的提示127.0.0.1是本机的IP地址，6379为Redis服务器运行的端口。现在输入PING命令，如下图所示。
+上面的提示127.0.0.1是本机的IP地址，6379为Redis服务器运行的端口。
