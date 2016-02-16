@@ -3,12 +3,12 @@
  
 PATH=/usr/local/bin:/sbin:/usr/bin:/bin
  
-REDISPORT=6379 #实际环境而定
-EXEC=/usr/local/bin/redis-server #实际环境而定
+REDISPORT=6382 #实际环境而定
+EXEC=/usr/local/bin/redis-server  #实际环境而定
 REDIS_CLI=/usr/local/bin/redis-cli #实际环境而定
  
-PIDFILE=/var/run/redis.pid
-CONF=/usr/local/redis/conf/redis.conf #实际环境而定
+PIDFILE=/var/run/redis-node2.pid
+CONF=/usr/local/redis-cluster/redis-node2/conf/redis.conf #实际环境而定
  
 case "$1" in
         start)
@@ -16,12 +16,12 @@ case "$1" in
                 then
                         echo "$PIDFILE exists, process is already running or crashed."
                 else
-                        echo "Starting Redis server..."
+                        echo "Starting Redis node2 server..."
                         $EXEC $CONF
                 fi
                 if [ "$?"="0" ]
                 then
-                        echo "Redis is running..."
+                        echo "Redis node2 is running..."
                 fi
                 ;;
         stop)
@@ -37,7 +37,7 @@ case "$1" in
                                 echo "Waiting for Redis to shutdown..."
                                 sleep 1
                         done
-                        echo "Redis stopped"
+                        echo "Redis node2 stopped"
                 fi
                 ;;
         restart|force-reload)
@@ -45,6 +45,6 @@ case "$1" in
                 ${0} start
                 ;;
         *)
-                echo "Usage: /etc/init.d/redis {start|stop|restart|force-reload}" >&2
+                echo "Usage: /etc/init.d/redis-6382 {start|stop|restart|force-reload}" >&2
                 exit 1
 esac

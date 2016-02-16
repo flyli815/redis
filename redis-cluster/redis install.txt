@@ -1,0 +1,103 @@
+安装前准备
+yum -y install gcc*
+yum -y install libc*
+yum -y install vim
+
+*安装
+1、下载，解压，编译:
+
+$ wget http://download.redis.io/releases/redis-3.0.6.tar.gz
+$ tar xzf redis-3.0.6.tar.gz
+$ cd redis-3.0.6
+$ make
+make MALLOC=libc
+#make install
+
+
+# 然后用客户端测试一下是否启动成功。
+$ redis-cli
+redis> set foo bar
+OK
+redis> get foo
+"bar"
+redis> ping
+PONG
+
+上面的提示127.0.0.1是本机的IP地址，6379为Redis服务器运行的端口。
+
+
+2、编译完成后，在Src目录下，有四个可执行文件redis-server、redis-benchmark、redis-cli和redis.conf。然后拷贝到一个目录下。
+
+# 节点一
+mkdir -p /usr/local/redis-cluster/redis-node1/bin/
+mkdir -p /usr/local/redis-cluster/redis-node1/logs/
+mkdir -p /usr/local/redis-cluster/redis-node1/conf/
+
+cp /root/redis/redis-3.0.6/redis-server /usr/local/redis-cluster/redis-node1/bin/
+cp /root/redis/redis-3.0.6/redis-benchmark /usr/local/redis-cluster/redis-node1/bin/
+cp /root/redis/redis-3.0.6/redis-cli /usr/local/redis-cluster/redis-node1/bin/
+cp /root/redis/redis-3.0.6/redis-check-dump /usr/local/redis-cluster/redis-node1/bin/
+cp /root/redis/redis-3.0.6/redis-check-aof /usr/local/redis-cluster/redis-node1/bin/
+
+
+# 节点二
+mkdir -p /usr/local/redis-cluster/redis-node2/bin/
+mkdir -p /usr/local/redis-cluster/redis-node2/logs/
+mkdir -p /usr/local/redis-cluster/redis-node2/conf/
+
+cp /usr/local/redis-cluster/redis-node1/bin/* /usr/local/redis-cluster/redis-node2/bin/
+
+
+# 节点三
+mkdir -p /usr/local/redis-cluster/redis-node3/bin/
+mkdir -p /usr/local/redis-cluster/redis-node3/logs/
+mkdir -p /usr/local/redis-cluster/redis-node3/conf/
+
+cp /usr/local/redis-cluster/redis-node1/bin/* /usr/local/redis-cluster/redis-node3/bin/
+
+#修改配置文件redis.conf
+##修改配置文件中的下面选项
+port 7000
+daemonize yes
+cluster-enabled yes
+cluster-config-file nodes.conf
+cluster-node-timeout 5000
+appendonly yes
+
+
+cp /root/redis-cluster/redis-node1/conf/redis.conf  /usr/local/redis-cluster/redis-node1/conf/
+cp /root/redis-cluster/redis-node2/conf/redis.conf  /usr/local/redis-cluster/redis-node2/conf/
+cp /root/redis-cluster/redis-node3/conf/redis.conf  /usr/local/redis-cluster/redis-node3/conf/
+
+
+# 添加自启动服务
+cp redis-638* /etc/init.d/
+cp redis-cluster /etc/init.d/
+
+/sbin/chkconfig --add redis-6381
+/sbin/chkconfig --add redis-6382
+/sbin/chkconfig --add redis-6383
+/sbin/chkconfig redis-6381 on
+/sbin/chkconfig redis-6382 on
+/sbin/chkconfig redis-6383 on
+
+/sbin/chkconfig --add redis-cluster
+/sbin/chkconfig redis-cluster on
+
+service redis-cluster restart
+
+
+# 启动redis
+/usr/local/redis-cluster/redis-node1/bin/redis-server /usr/local/redis-cluster/redis-node1/conf/redis.conf
+/usr/local/redis-cluster/redis-node2/bin/redis-server /usr/local/redis-cluster/redis-node2/conf/redis.conf
+/usr/local/redis-cluster/redis-node3/bin/redis-server /usr/local/redis-cluster/redis-node3/conf/redis.conf
+
+
+/usr/local/redis-cluster/redis-node1/bin/redis-cli -p 6381
+/usr/local/redis-cluster/redis-node2/bin/redis-cli -p 6382
+/usr/local/redis-cluster/redis-node3/bin/redis-cli -p 6383
+
+
+cluster meet 10.0.13.100 6381
+cluster meet 10.0.13.100 6382
+cluster meet 10.0.13.100 6383
