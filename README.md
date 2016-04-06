@@ -1,3 +1,5 @@
+###  test
+
 # redis 安装前准备
 yum -y install gcc+
 
